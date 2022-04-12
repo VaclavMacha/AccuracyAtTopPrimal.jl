@@ -18,13 +18,14 @@ struct PatMat <: AbstractThreshold
 end
 
 function find_threshold(thres::PatMat, targets, scores)
-    @unpack surrogate, τ = thres
+    τ = thres.τ
+    surrogate = thres.surrogate
 
     t = [find_root(t -> quant(surrogate, scores .- t, τ), quantile(vec(scores), 1 - τ))]
     ps = params(scores, t)
     ∇l = gradient(() -> quant(surrogate, scores .- t, τ), ps)
 
-    return t[1], .- ∇l[scores] ./ ∇l[t]
+    return t[1], .-∇l[scores] ./ ∇l[t]
 end
 
 struct PatMatNP <: AbstractThreshold
@@ -33,7 +34,8 @@ struct PatMatNP <: AbstractThreshold
 end
 
 function find_threshold(thres::PatMatNP, targets, scores)
-    @unpack surrogate, τ = thres
+    τ = thres.τ
+    surrogate = thres.surrogate
     inds = find_negatives(targets)
     s = @views scores[inds]
 
@@ -44,7 +46,7 @@ function find_threshold(thres::PatMatNP, targets, scores)
     ∇l_s = zero(scores)
     ∇l_s[inds] .= ∇l[s]
 
-    return t[1], .- ∇l_s ./ ∇l[t]
+    return t[1], .-∇l_s ./ ∇l[t]
 end
 
 struct TopPush <: AbstractThreshold end
@@ -65,15 +67,15 @@ struct TopPushK <: AbstractThreshold
 end
 
 function find_threshold(thres::TopPushK, targets, scores)
-    @unpack K = thres
+    K = thres.K
     inds = find_negatives(targets)
     s = @views scores[inds]
 
-    ind = partialsortperm(s, 1:K; rev = true)
+    ind = partialsortperm(s, 1:K; rev=true)
     Δt_s = zero(scores)
-    Δt_s[inds[ind]] .= 1/K
+    Δt_s[inds[ind]] .= 1 / K
 
-    return sum(s[ind])/K, Δt_s
+    return sum(s[ind]) / K, Δt_s
 end
 
 struct τFPL <: AbstractThreshold
@@ -81,7 +83,7 @@ struct τFPL <: AbstractThreshold
 end
 
 function find_threshold(thres::τFPL, targets, scores)
-    @unpack τ = thres
+    τ = thres.τ
     inds = find_negatives(targets)
     s = scores[inds]
     K = floor(Int64, τ*length(inds)) + 1
@@ -98,7 +100,7 @@ struct TopMean <: AbstractThreshold
 end
 
 function find_threshold(thres::TopMean, targets, scores)
-    @unpack τ = thres
+    τ = thres.τ
     K = floor(Int64, τ*length(scores)) + 1
 
     ind = partialsortperm(vec(scores), 1:K; rev = true)
@@ -113,7 +115,7 @@ struct Grill <: AbstractThreshold
 end
 
 function find_threshold(thres::Grill, targets, scores)
-    @unpack τ = thres
+    τ = thres.τ
     t = quantile(vec(scores), 1 - τ)
     Δt_s = zero(scores)
 
@@ -125,7 +127,7 @@ struct GrillNP <: AbstractThreshold
 end
 
 function find_threshold(thres::GrillNP, targets, scores)
-    @unpack τ = thres
+    τ = thres.τ
     inds = find_negatives(targets)
     t = quantile(scores[inds], 1 - τ)
     Δt_s = zero(scores)

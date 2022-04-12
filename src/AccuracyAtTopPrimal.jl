@@ -1,11 +1,26 @@
 module AccuracyAtTopPrimal
 
-using LinearAlgebra, Statistics, Flux, Roots, Parameters
+using Flux
+using LinearAlgebra
+using Roots
+using Statistics
 
+using Flux: params
 using Zygote: @adjoint, @nograd
 
-export PatMat, PatMatNP, TopPush, TopPushK, τFPL, TopMean, Grill, GrillNP
-export fnr, fpr, hinge, quadratic, threshold
+export PatMat
+export PatMatNP
+export TopPush
+export TopPushK
+export τFPL
+export TopMean
+export Grill
+export GrillNP
+export fnr
+export fpr
+export hinge
+export quadratic
+export threshold
 
 abstract type AbstractThreshold end
 

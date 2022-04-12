@@ -1,1 +1,6 @@
 /examples/
+sftp-config.json
+.vscode
+tmp
+
+Manifest.toml

@@ -21,7 +21,7 @@ function find_threshold(thres::PatMat, targets, scores)
     τ = thres.τ
     surrogate = thres.surrogate
 
-    t = [find_root(t -> quant(surrogate, scores .- t, τ), quantile(vec(scores), 1 - τ))]
+    t = [find_root(t -> quant(surrogate, scores .- t, τ), save_quantile(vec(scores), 1 - τ))]
     ps = params(scores, t)
     ∇l = gradient(() -> quant(surrogate, scores .- t, τ), ps)
 
@@ -39,7 +39,7 @@ function find_threshold(thres::PatMatNP, targets, scores)
     inds = find_negatives(targets)
     s = @views scores[inds]
 
-    t = [find_root(t -> quant(surrogate, s .- t, τ), quantile(vec(s), 1 - τ))]
+    t = [find_root(t -> quant(surrogate, s .- t, τ), save_quantile(vec(s), 1 - τ))]
     ps = params(s, t)
     ∇l = gradient(() -> quant(surrogate, s .- t, τ), ps)
 
@@ -116,7 +116,7 @@ end
 
 function find_threshold(thres::Grill, targets, scores)
     τ = thres.τ
-    t = quantile(vec(scores), 1 - τ)
+    t = save_quantile(vec(scores), 1 - τ)
     Δt_s = zero(scores)
 
     return t, Δt_s
@@ -129,7 +129,7 @@ end
 function find_threshold(thres::GrillNP, targets, scores)
     τ = thres.τ
     inds = find_negatives(targets)
-    t = quantile(scores[inds], 1 - τ)
+    t = save_quantile(scores[inds], 1 - τ)
     Δt_s = zero(scores)
 
     return t, Δt_s

@@ -35,3 +35,12 @@ function find_root(f::Function, x_0::Real)
         end
     end
 end
+
+function save_quantile(x, p::Real; kwargs...)
+    T = eltype(x)
+    if any(isnan.(x))
+        return T(NaN)
+    else
+        quantile(x, p; kwargs...)
+    end
+end

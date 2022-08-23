@@ -1,8 +1,16 @@
 function threshold(thres::AbstractThreshold, targets, scores)
+    if any(isnan.(scores))
+        T = eltype(scores)
+        return T(NaN)
+    end
     return find_threshold(thres, cpu(targets), cpu(scores))[1]
 end
 
 @adjoint function threshold(thres::AbstractThreshold, targets, scores)
+    if any(isnan.(scores))
+        T = eltype(scores)
+        return T(NaN), Δ -> (nothing, nothing, Δ .* T(NaN))
+    end
     t, Δt_s = find_threshold(thres, cpu(targets), cpu(scores))
     t = convert(eltype(scores), t)
     Δt_s = convert(typeof(scores), Δt_s)
